@@ -23,7 +23,16 @@ function notaFinal(unidades) {
   return n.length ? n.reduce((a, b) => a + b, 0) / n.length : 0;
 }
 
+// RF-17: ¿n clases calificables es inusualmente bajo frente a la sección?
+// ponytail: bajo = menos de la mitad de la mediana, y solo cuando ya hay al menos 4 clases.
+function pocasClases(n, conteosSeccion) {
+  const s = [...conteosSeccion].sort((a, b) => a - b);
+  if (!s.length) return false;
+  const mediana = s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+  return mediana >= 4 && n < mediana / 2;
+}
+
 // Redondeo solo para mostrar/exportar.
 const mostrar = x => Math.round(x * 100) / 100;
 
-if (typeof module !== 'undefined') module.exports = { PORCENTAJE, actitudinal, notaUnidad, notaFinal, mostrar };
+if (typeof module !== 'undefined') module.exports = { PORCENTAJE, actitudinal, notaUnidad, notaFinal, pocasClases, mostrar };

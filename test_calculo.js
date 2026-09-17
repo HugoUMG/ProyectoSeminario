@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { actitudinal, notaUnidad, notaFinal, mostrar } = require('./calculo');
+const { actitudinal, notaUnidad, notaFinal, pocasClases, mostrar } = require('./calculo');
 
 const rep = (marca, n, amonestacion = false) => Array.from({ length: n }, () => ({ marca, amonestacion }));
 
@@ -20,5 +20,12 @@ assert.strictEqual(notaUnidad(rep('✓', 5), 35), 95);
 assert.strictEqual(notaUnidad(rep('✓', 5), 99), 100);
 // Final = promedio simple, sin redondeo acumulado
 assert.strictEqual(mostrar(notaFinal([91.666, 88.333, 100, 70])), 87.5);
+
+// RF-17: 3 clases frente a una sección con mediana 18 → aviso; 10 no; inicio de unidad (mediana < 4) nunca
+const seccion = [18, 18, 17, 18, 3, 10, 18];
+assert.strictEqual(pocasClases(3, seccion), true);
+assert.strictEqual(pocasClases(10, seccion), false);
+assert.strictEqual(pocasClases(0, [2, 2, 0, 2]), false);
+assert.strictEqual(pocasClases(0, []), false);
 
 console.log('OK');

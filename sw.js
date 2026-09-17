@@ -1,5 +1,5 @@
 // Offline (RNF-02): cache-first de todos los archivos de la app. Subir VERSION al publicar cambios.
-const VERSION = 'edfisica-v1';
+const VERSION = 'edfisica-v2';
 const ARCHIVOS = ['./', 'index.html', 'db.js', 'calculo.js', 'importar.js', 'exportar.js', 'manifest.json',
   'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'];
 

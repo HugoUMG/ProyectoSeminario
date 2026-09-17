@@ -42,6 +42,7 @@
   td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
   td input { width:64px; min-height:40px; padding:4px; text-align:right; }
   .cerrada { background:#ffd700; }
+  .bajo { background:#ffd700; font-weight:bold; }
   .retirado { color:#777; text-decoration:line-through; }
   .aviso { padding:12px; border:2px solid var(--acento); border-radius:6px; margin:12px 0; }
 </style>
@@ -98,6 +99,7 @@
   <label>Unidad</label>
   <select id="unidadNotas"><option>1</option><option>2</option><option>3</option><option>4</option></select>
   <div id="avisoCerrada" class="aviso cerrada oculto">Unidad cerrada. Solo consulta.</div>
+  <div id="avisoPocas" class="aviso oculto" style="border-color:#e08a00"></div>
   <p class="muted">Toque el nombre para cambiar el estado del alumno.</p>
   <table>
     <thead><tr><th>Alumno</th><th class="num">Clases</th><th class="num">Act./60</th><th class="num">Ex./40</th><th class="num">Total</th></tr></thead>
@@ -190,7 +192,12 @@ async function pedirPin() {
   }
 }
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+  // Al llegar una versión nueva, recargar una vez para no seguir con la vieja.
+  let recargado = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!recargado && navigator.serviceWorker.controller) { recargado = true; location.reload(); } });
+}
 const ver = id => { for (const v of ['vSecciones', 'vImportar', 'vPase', 'vNotas']) $(v).classList.toggle('oculto', v !== id); };
 
 let libro = null;
@@ -381,16 +388,23 @@ function pintarNotas() {
   const { alumnos, clases, reg } = notas;
   $('avisoCerrada').classList.toggle('oculto', !reg.cerrada);
   $('btnCerrar').textContent = reg.cerrada ? 'Reabrir unidad' : 'Cerrar unidad';
+  const calificables = a => clasesDe(clases, a.id).filter(c => c.marca in PORCENTAJE).length;
+  const conteos = alumnos.filter(a => a.estado !== 'retirado').map(calificables);
+  const bajos = [];
   $('filasNotas').innerHTML = alumnos.map(a => {
-    const cl = clasesDe(clases, a.id), calif = cl.filter(c => c.marca in PORCENTAJE).length;
+    const cl = clasesDe(clases, a.id), calif = calificables(a);
+    const bajo = a.estado !== 'retirado' && pocasClases(calif, conteos);
+    if (bajo) bajos.push(a.nombre);
     const ex = reg.examenes[a.id];
     return `<tr data-id="${a.id}">
       <td class="${a.estado === 'retirado' ? 'retirado' : ''}"><b>${a.nombre}</b><br><span class="muted">${a.id}${a.estado !== 'activo' ? ' · ' + a.estado : ''}</span></td>
-      <td class="num">${calif}</td>
+      <td class="num ${bajo ? 'bajo' : ''}">${bajo ? '⚠ ' : ''}${calif}</td>
       <td class="num">${mostrar(actitudinal(cl))}</td>
       <td class="num"><input inputmode="decimal" value="${ex ?? ''}" ${reg.cerrada ? 'disabled' : ''}></td>
       <td class="num"><b>${mostrar(notaUnidad(cl, ex))}</b></td></tr>`;
   }).join('');
+  $('avisoPocas').classList.toggle('oculto', !bajos.length);
+  $('avisoPocas').textContent = `⚠ Con muy pocas clases frente al resto de la sección: ${bajos.join(', ')}. Revise si faltan marcas o si debe cambiar su estado.`;
 }
 
 $('filasNotas').onchange = async e => {
