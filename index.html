@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Educación Física</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
@@ -15,7 +15,7 @@
   header button { color:var(--bg); background:none; border:2px solid var(--bg); }
   main { padding:16px; max-width:600px; margin:auto; }
   h2 { margin:0 0 12px; }
-  button, input, select { font:inherit; min-height:48px; border:2px solid var(--borde); border-radius:6px; padding:8px 12px; background:var(--bg); color:var(--fg); }
+  button, input, select { font:inherit; min-height:48px; touch-action:manipulation; border:2px solid var(--borde); border-radius:6px; padding:8px 12px; background:var(--bg); color:var(--fg); }
   button.primario { background:var(--acento); color:#fff; border-color:var(--acento); width:100%; font-weight:bold; }
   label { display:block; margin:12px 0 4px; font-weight:bold; }
   input, select { width:100%; }
@@ -24,13 +24,14 @@
   ul { list-style:none; padding:0; margin:0; }
   li { padding:12px 0; border-bottom:2px solid #ccc; display:flex; justify-content:space-between; align-items:center; gap:8px; }
   .muted { color:#444; font-size:15px; }
+  #listaSecciones button { white-space:nowrap; }
   .oculto { display:none; }
-  .marca { min-width:64px; font-size:26px; font-weight:bold; padding:4px; }
+  .marca { min-width:64px; font-size:26px; font-weight:bold; padding:4px; user-select:none; -webkit-user-select:none; }
   .m-✓ { background:#0a7f2e; color:#fff; border-color:#0a7f2e; }
   .m-X { background:#e08a00; color:#000; border-color:#e08a00; }
   .m-\* { background:#c40000; color:#fff; border-color:#c40000; }
   .m-P, .m-E { background:#666; color:#fff; border-color:#666; }
-  .obs { min-width:48px; font-size:22px; }
+  .obs { min-width:52px; font-size:22px; user-select:none; -webkit-user-select:none; }
   .obs.n2 { background:#c40000; color:#fff; border-color:#c40000; }
   .obs.n1 { background:#ffd700; border-color:#ffd700; }
   .nombre { flex:1; font-weight:bold; line-height:1.2; }
@@ -39,11 +40,23 @@
   textarea { width:100%; font:inherit; min-height:80px; border:2px solid var(--borde); border-radius:6px; padding:8px; }
   table { width:100%; border-collapse:collapse; }
   th, td { padding:8px 4px; border-bottom:2px solid #ccc; text-align:left; }
+  /* Columna de nombre: ocupa lo que sobra y no parte el nombre en varias líneas */
+  td:first-child { width:100%; max-width:0; }
+  td:first-child b, td:first-child .muted { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
   td input { width:64px; min-height:40px; padding:4px; text-align:right; }
   .cerrada { background:#ffd700; }
   .bajo { background:#ffd700; font-weight:bold; }
   .retirado { color:#777; text-decoration:line-through; }
+  /* Teléfono: menos margen, texto un punto más chico, botones de acción a todo el ancho */
+  @media (max-width: 420px) {
+    body { font-size:16px; }
+    main { padding:12px 12px calc(12px + env(safe-area-inset-bottom)); }
+    header { padding:10px 12px; }
+    th, td { padding:8px 3px; font-size:15px; }
+    td input { width:56px; }
+    #vNotas .fila { flex-direction:column; }
+  }
   .aviso { padding:12px; border:2px solid var(--acento); border-radius:6px; margin:12px 0; }
 </style>
 </head>
@@ -410,7 +423,7 @@ function pintarNotas() {
     if (bajo) bajos.push(a.nombre);
     const ex = reg.examenes[a.id];
     return `<tr data-id="${a.id}">
-      <td class="${a.estado === 'retirado' ? 'retirado' : ''}"><b>${a.nombre}</b><br><span class="muted">${a.id}${a.estado !== 'activo' ? ' · ' + a.estado : ''}</span></td>
+      <td class="${a.estado === 'retirado' ? 'retirado' : ''}"><b>${a.nombre}</b><span class="muted">${a.id}${a.estado !== 'activo' ? ' · ' + a.estado : ''}</span></td>
       <td class="num ${bajo ? 'bajo' : ''}">${bajo ? '⚠ ' : ''}${calif}</td>
       <td class="num">${mostrar(actitudinal(cl))}</td>
       <td class="num"><input inputmode="decimal" value="${ex ?? ''}" ${reg.cerrada ? 'disabled' : ''}></td>
