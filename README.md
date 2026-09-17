@@ -28,21 +28,21 @@ Cada alumno recibe una clave como `5A-01`, `5A-02`… en el orden del listado.
 
 1. Toque **Lista →** en la sección.
 2. Verifique la **fecha** (viene la de hoy) y la **unidad** (recuerda la última que usó).
-3. Todos aparecen con **✓**. Solo toque a quien sea distinto; cada toque cambia la marca:
+3. Todos aparecen con **✓**. Solo toque a quien sea distinto; cada toque cambia la marca.
+4. Para anotar una falta toque el **○** del alumno, elija el nivel, escriba qué hizo (es obligatorio) y **Guardar**.
 
-   | Marca | Color | Significa |
-   |---|---|---|
-   | **✓** | verde | uniforme completo, buen comportamiento y técnica |
-   | **X** | naranja | ropa deportiva sin uniforme / técnica deficiente |
-   | **\*** | rojo | sin uniforme, ropa no deportiva |
-   | **P** | gris | permiso — no cuenta para la nota |
-   | **E** | gris | ensayo de banda — no cuenta para la nota |
+| Marca | Color | Significa |
+|---|---|---|
+| **✓** | verde | uniforme completo, buen comportamiento y técnica |
+| **X** | naranja | ropa deportiva sin uniforme / técnica deficiente |
+| **\*** | rojo | sin uniforme, ropa no deportiva |
+| **P** | gris | permiso — no cuenta para la nota |
+| **E** | gris | ensayo de banda — no cuenta para la nota |
 
-4. Para anotar una falta toque el **○** del alumno, elija:
-   - **○ Advertencia** — queda registrada, no baja la nota.
-   - **△ Amonestación** — baja a la mitad la nota de ese día.
-
-   Escriba qué hizo (es obligatorio) y **Guardar**.
+| Observación | Efecto |
+|---|---|
+| **○ Advertencia** | queda registrada, no baja la nota |
+| **△ Amonestación** | baja a la mitad la nota de ese día |
 
 Todo se guarda al instante. No hay botón de guardar.
 
