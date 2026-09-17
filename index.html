@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Educación Física</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<style>
+  /* Alto contraste para sol directo (RNF-04). Botones grandes, un toque (RNF-05). */
+  :root { --fg:#000; --bg:#fff; --acento:#0033cc; --borde:#000; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:18px/1.4 system-ui,sans-serif; color:var(--fg); background:var(--bg); }
+  header { padding:12px 16px; background:var(--fg); color:var(--bg); font-weight:bold; display:flex; justify-content:space-between; align-items:center; }
+  header button { color:var(--bg); background:none; border:2px solid var(--bg); }
+  main { padding:16px; max-width:600px; margin:auto; }
+  h2 { margin:0 0 12px; }
+  button, input, select { font:inherit; min-height:48px; border:2px solid var(--borde); border-radius:6px; padding:8px 12px; background:var(--bg); color:var(--fg); }
+  button.primario { background:var(--acento); color:#fff; border-color:var(--acento); width:100%; font-weight:bold; }
+  label { display:block; margin:12px 0 4px; font-weight:bold; }
+  input, select { width:100%; }
+  .fila { display:flex; gap:8px; }
+  .fila > * { flex:1; }
+  ul { list-style:none; padding:0; margin:0; }
+  li { padding:12px 0; border-bottom:2px solid #ccc; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .muted { color:#444; font-size:15px; }
+  .oculto { display:none; }
+  .marca { min-width:64px; font-size:26px; font-weight:bold; padding:4px; }
+  .m-✓ { background:#0a7f2e; color:#fff; border-color:#0a7f2e; }
+  .m-X { background:#e08a00; color:#000; border-color:#e08a00; }
+  .m-\* { background:#c40000; color:#fff; border-color:#c40000; }
+  .m-P, .m-E { background:#666; color:#fff; border-color:#666; }
+  .obs { min-width:48px; font-size:22px; }
+  .obs.n2 { background:#c40000; color:#fff; border-color:#c40000; }
+  .obs.n1 { background:#ffd700; border-color:#ffd700; }
+  .nombre { flex:1; font-weight:bold; line-height:1.2; }
+  dialog { border:3px solid var(--fg); border-radius:8px; width:92vw; max-width:420px; font:inherit; }
+  dialog::backdrop { background:rgba(0,0,0,.6); }
+  textarea { width:100%; font:inherit; min-height:80px; border:2px solid var(--borde); border-radius:6px; padding:8px; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:8px 4px; border-bottom:2px solid #ccc; text-align:left; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  td input { width:64px; min-height:40px; padding:4px; text-align:right; }
+  .cerrada { background:#ffd700; }
+  .retirado { color:#777; text-decoration:line-through; }
+  .aviso { padding:12px; border:2px solid var(--acento); border-radius:6px; margin:12px 0; }
+</style>
+</head>
+<body>
+<header><span>Educación Física</span><button id="btnImportar">+ Importar</button></header>
+<main>
+
+<section id="vSecciones">
+  <h2>Secciones</h2>
+  <ul id="listaSecciones"></ul>
+  <p id="sinSecciones" class="muted">No hay alumnos cargados. Toque <b>+ Importar</b> para cargar un listado desde Excel.</p>
+  <h2 style="margin-top:32px">Respaldo</h2>
+  <p class="muted">Guarde una copia de todo (alumnos, marcas, exámenes) por si el teléfono se daña o se pierde.</p>
+  <div class="fila">
+    <button id="btnRespaldar">⬇ Guardar respaldo</button>
+    <button id="btnRestaurar">⬆ Restaurar</button>
+  </div>
+  <input type="file" id="archivoRespaldo" accept=".json" class="oculto">
+</section>
+
+<section id="vImportar" class="oculto">
+  <h2>Importar alumnos desde Excel</h2>
+  <label>Archivo Excel</label>
+  <input type="file" id="archivo" accept=".xlsx,.xls,.csv">
+  <div id="pasoHoja" class="oculto">
+    <label>Hoja</label>
+    <select id="hoja"></select>
+    <div class="fila">
+      <div><label>Grado</label><input id="grado" inputmode="numeric" placeholder="5"></div>
+      <div><label>Sección</label><input id="seccion" placeholder="A" maxlength="2"></div>
+    </div>
+    <label><input type="checkbox" id="entrega" checked style="width:auto;min-height:auto"> Esta sección entrega notas</label>
+    <div id="previa" class="aviso oculto"></div>
+    <button class="primario" id="btnGuardar">Guardar alumnos</button>
+    <button id="btnCancelar" style="width:100%;margin-top:8px">Cancelar</button>
+  </div>
+</section>
+
+<section id="vPase" class="oculto">
+  <h2 id="tituloPase"></h2>
+  <div class="fila">
+    <div><label>Fecha</label><input type="date" id="fecha"></div>
+    <div><label>Unidad</label><select id="unidad"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+  </div>
+  <div id="avisoPaseCerrada" class="aviso cerrada oculto">Unidad cerrada. Solo consulta.</div>
+  <p class="muted">Toque la marca para cambiarla: ✓ → X → * → P → E. Toque ○ para anotar una observación.</p>
+  <ul id="listaAlumnos"></ul>
+  <button id="btnVolver" style="width:100%;margin-top:16px">← Secciones</button>
+</section>
+
+<section id="vNotas" class="oculto">
+  <h2 id="tituloNotas"></h2>
+  <label>Unidad</label>
+  <select id="unidadNotas"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+  <div id="avisoCerrada" class="aviso cerrada oculto">Unidad cerrada. Solo consulta.</div>
+  <p class="muted">Toque el nombre para cambiar el estado del alumno.</p>
+  <table>
+    <thead><tr><th>Alumno</th><th class="num">Clases</th><th class="num">Act./60</th><th class="num">Ex./40</th><th class="num">Total</th></tr></thead>
+    <tbody id="filasNotas"></tbody>
+  </table>
+  <button class="primario" id="btnCerrar" style="margin-top:16px"></button>
+  <div class="fila" style="margin-top:8px">
+    <button id="btnExportarCuadro">⬇ Cuadro unidad</button>
+    <button id="btnExportarConsolidado">⬇ Consolidado</button>
+  </div>
+  <button id="btnVolverNotas" style="width:100%;margin-top:8px">← Secciones</button>
+</section>
+
+<dialog id="dlgEstado">
+  <form method="dialog">
+    <h2 id="dlgEstadoTitulo"></h2>
+    <label>Estado</label>
+    <select id="estadoSel"><option value="activo">Activo</option><option value="intermitente">Intermitente</option><option value="retirado">Retirado</option></select>
+    <label>Fecha de retiro</label>
+    <input type="date" id="fechaRetiro">
+    <div class="fila" style="margin-top:12px">
+      <button value="cancelar">Cancelar</button>
+      <button value="ok" class="primario">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgPin">
+  <form method="dialog">
+    <h2 id="pinTitulo"></h2>
+    <p id="pinAyuda" class="muted"></p>
+    <label>PIN (4 a 8 dígitos)</label>
+    <input id="pin1" type="password" inputmode="numeric" pattern="\d{4,8}" autocomplete="off" required>
+    <div id="pinConfirmar"><label>Repita el PIN</label><input id="pin2" type="password" inputmode="numeric" autocomplete="off"></div>
+    <p id="pinError" class="aviso oculto" style="border-color:#c40000"></p>
+    <button value="ok" class="primario" style="margin-top:12px">Entrar</button>
+  </form>
+</dialog>
+
+<dialog id="dlgObs">
+  <form method="dialog">
+    <h2 id="dlgTitulo"></h2>
+    <label><input type="radio" name="nivel" value="1" style="width:auto;min-height:auto"> ○ Advertencia (no afecta la nota)</label>
+    <label><input type="radio" name="nivel" value="2" style="width:auto;min-height:auto"> △ Amonestación (baja 50 % la nota del día)</label>
+    <label>Falta cometida (obligatorio)</label>
+    <textarea id="obsTexto"></textarea>
+    <div class="fila" style="margin-top:12px">
+      <button value="quitar">Quitar</button>
+      <button value="cancelar">Cancelar</button>
+      <button value="ok" class="primario">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="db.js"></script>
+<script src="importar.js"></script>
+<script src="calculo.js"></script>
+<script src="exportar.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+// ---------- PIN (RNF-09) ----------
+// ponytail: PIN con hash SHA-256 en el dispositivo. Protege de miradas casuales, no de un atacante con el teléfono.
+const hashPin = async pin => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('edfisica:' + pin)))].map(b => b.toString(16).padStart(2, '0')).join('');
+
+async function pedirPin() {
+  const cfg = await DB.get('config', 'config') || { id: 'config' };
+  const crear = !cfg.pin, dlg = $('dlgPin'), form = dlg.querySelector('form');
+  $('pinTitulo').textContent = crear ? 'Cree un PIN' : 'Ingrese su PIN';
+  $('pinAyuda').textContent = crear ? 'Protege las notas de los alumnos. No lo olvide: sin él no se puede entrar.' : '';
+  $('pinConfirmar').classList.toggle('oculto', !crear);
+  $('pin2').required = crear;
+  dlg.oncancel = e => e.preventDefault(); // no se puede cerrar con Escape
+  dlg.showModal();
+  while (true) {
+    await new Promise(ok => form.onsubmit = e => { e.preventDefault(); ok(); });
+    const p1 = $('pin1').value, p2 = $('pin2').value;
+    let error = '';
+    if (!/^\d{4,8}$/.test(p1)) error = 'El PIN debe tener de 4 a 8 dígitos.';
+    else if (crear && p1 !== p2) error = 'Los PIN no coinciden.';
+    else if (!crear && await hashPin(p1) !== cfg.pin) error = 'PIN incorrecto.';
+    $('pinError').textContent = error; $('pinError').classList.toggle('oculto', !error);
+    if (error) { $('pin1').value = $('pin2').value = ''; $('pin1').focus(); continue; }
+    if (crear) await DB.put('config', { ...cfg, pin: await hashPin(p1) });
+    $('pin1').value = $('pin2').value = '';
+    dlg.close();
+    return;
+  }
+}
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+const ver = id => { for (const v of ['vSecciones', 'vImportar', 'vPase', 'vNotas']) $(v).classList.toggle('oculto', v !== id); };
+
+let libro = null;
+const hojaActual = () => XLSX.utils.sheet_to_json(libro.Sheets[$('hoja').value], { header: 1 });
+const datosForm = () => ({ grado: $('grado').value.trim(), seccion: $('seccion').value.trim().toUpperCase() });
+
+function previsualizar() {
+  const { grado, seccion } = datosForm();
+  if (!libro || !grado || !seccion) return $('previa').classList.add('oculto');
+  const a = alumnosDesdeHoja(hojaActual(), grado, seccion);
+  $('previa').classList.remove('oculto');
+  $('previa').innerHTML = a.length
+    ? `<b>${a.length} alumnos</b> en ${grado}${seccion}<br><span class="muted">${a[0].id} ${a[0].nombre} … ${a.at(-1).id} ${a.at(-1).nombre}</span>`
+    : 'No se encontraron nombres en esta hoja.';
+}
+
+$('archivo').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  libro = XLSX.read(await f.arrayBuffer());
+  $('hoja').innerHTML = libro.SheetNames.map(n => `<option>${n}</option>`).join('');
+  // ponytail: si la hoja se llama "5A" rellena grado/sección; el formato real está pendiente.
+  const m = libro.SheetNames[0].match(/^(\d)\s*([A-Za-z])$/);
+  if (m) { $('grado').value = m[1]; $('seccion').value = m[2].toUpperCase(); }
+  $('pasoHoja').classList.remove('oculto');
+  previsualizar();
+};
+['hoja', 'grado', 'seccion'].forEach(id => $(id).oninput = previsualizar);
+
+$('btnGuardar').onclick = async () => {
+  const { grado, seccion } = datosForm();
+  if (!libro || !grado || !seccion) return alert('Indique grado y sección.');
+  const alumnos = alumnosDesdeHoja(hojaActual(), grado, seccion);
+  if (!alumnos.length) return alert('No se encontraron nombres.');
+  const id = `${grado}${seccion}`;
+  if (await DB.get('secciones', id) && !confirm(`La sección ${id} ya existe. ¿Reemplazar sus alumnos?`)) return;
+  for (const a of await DB.todos('alumnos')) if (a.seccionId === id) await DB.del('alumnos', a.id);
+  await DB.put('secciones', { id, grado, seccion, entregaNotas: $('entrega').checked });
+  await DB.putMuchos('alumnos', alumnos);
+  $('archivo').value = ''; libro = null; $('pasoHoja').classList.add('oculto');
+  mostrarSecciones();
+};
+$('btnCancelar').onclick = mostrarSecciones;
+$('btnImportar').onclick = () => ver('vImportar');
+
+// ---------- Respaldo (RF-16 / RNF-07) ----------
+$('btnRespaldar').onclick = async () => {
+  const datos = await DB.exportar();
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([JSON.stringify(datos)], { type: 'application/json' })),
+    download: `respaldo_edfisica_${hoy()}.json`,
+  });
+  a.click(); URL.revokeObjectURL(a.href);
+};
+$('btnRestaurar').onclick = () => $('archivoRespaldo').click();
+$('archivoRespaldo').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  let datos;
+  try { datos = JSON.parse(await f.text()); if (!datos.alumnos || !datos.clases) throw 0; }
+  catch { return alert('El archivo no es un respaldo válido.'); }
+  if (!confirm(`Restaurar ${datos.alumnos.length} alumnos y ${datos.clases.length} clases. Esto REEMPLAZA todo lo que hay ahora. ¿Continuar?`)) return;
+  await DB.restaurar(datos);
+  mostrarSecciones();
+};
+
+async function mostrarSecciones() {
+  ver('vSecciones');
+  const secciones = await DB.todos('secciones');
+  const alumnos = await DB.todos('alumnos');
+  $('sinSecciones').classList.toggle('oculto', secciones.length > 0);
+  $('listaSecciones').innerHTML = secciones
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map(s => `<li data-id="${s.id}"><span><b>${s.id}</b> <span class="muted">${alumnos.filter(a => a.seccionId === s.id).length} alumnos${s.entregaNotas ? '' : ' · sin entrega'}</span></span><span class="fila"><button data-notas>Notas</button><button data-pase>Lista →</button></span></li>`)
+    .join('');
+  document.querySelectorAll('#listaSecciones li').forEach(li => li.onclick = e =>
+    e.target.closest('[data-notas]') ? abrirNotas(li.dataset.id) : abrirPase(li.dataset.id));
+}
+
+// ---------- Pase de lista (RF-03/06/07/10) ----------
+const MARCAS = ['✓', 'X', '*', 'P', 'E'];
+let pase = null; // { seccionId, alumnos, clase }
+const hoy = () => new Date().toLocaleDateString('sv'); // YYYY-MM-DD local
+
+async function abrirPase(seccionId) {
+  const cfg = await DB.get('config', 'config');
+  $('fecha').value = hoy();
+  $('unidad').value = cfg?.unidadActual || 1;
+  $('tituloPase').textContent = `Sección ${seccionId}`;
+  pase = { seccionId, alumnos: (await DB.todos('alumnos')).filter(a => a.seccionId === seccionId).sort((a, b) => a.id.localeCompare(b.id)) };
+  ver('vPase');
+  cargarClase();
+}
+
+async function cargarClase() {
+  const fecha = $('fecha').value, id = `${pase.seccionId}|${fecha}`;
+  let clase = await DB.get('clases', id);
+  const unidad = clase ? clase.unidad : Number($('unidad').value);
+  pase.cerrada = !!(await DB.get('unidades', `${pase.seccionId}|${unidad}`))?.cerrada;
+  $('avisoPaseCerrada').classList.toggle('oculto', !pase.cerrada);
+  if (!clase && pase.cerrada) { pase.clase = { marcas: {} }; return pintarAlumnos(); }
+  if (!clase) {
+    // ponytail: clase nueva = todos con ✓; la docente sólo toca las excepciones (RNF-05).
+    clase = { id, seccionId: pase.seccionId, fecha, unidad: Number($('unidad').value), marcas: {} };
+    for (const a of pase.alumnos) if (a.estado !== 'retirado' || !a.fechaRetiro || a.fechaRetiro > fecha) clase.marcas[a.id] = { m: '✓', obs: null };
+    await DB.put('clases', clase);
+  }
+  $('unidad').value = clase.unidad;
+  pase.clase = clase;
+  pintarAlumnos();
+}
+
+function pintarAlumnos() {
+  const { alumnos, clase } = pase;
+  $('listaAlumnos').innerHTML = alumnos.filter(a => a.id in clase.marcas).map(a => {
+    const r = clase.marcas[a.id], n = r.obs?.nivel || 0;
+    return `<li data-id="${a.id}">
+      <span class="nombre">${a.nombre}<br><span class="muted">${a.id}</span></span>
+      <button class="obs n${n}" data-obs>${n === 2 ? '△' : '○'}</button>
+      <button class="marca m-${r.m}" data-marca>${r.m}</button></li>`;
+  }).join('');
+}
+
+$('listaAlumnos').onclick = async e => {
+  const btn = e.target.closest('button'); if (!btn || pase.cerrada) return;
+  const id = btn.closest('li').dataset.id, r = pase.clase.marcas[id];
+  if ('marca' in btn.dataset) {
+    r.m = MARCAS[(MARCAS.indexOf(r.m) + 1) % MARCAS.length];
+    btn.textContent = r.m; btn.className = `marca m-${r.m}`;
+    await DB.put('clases', pase.clase);
+  } else {
+    await editarObs(id);
+  }
+};
+
+async function editarObs(id) {
+  const r = pase.clase.marcas[id], dlg = $('dlgObs');
+  $('dlgTitulo').textContent = pase.alumnos.find(a => a.id === id).nombre;
+  dlg.querySelectorAll('[name=nivel]').forEach(x => x.checked = Number(x.value) === (r.obs?.nivel || 1));
+  $('obsTexto').value = r.obs?.texto || '';
+  dlg.showModal();
+  const res = await new Promise(ok => dlg.querySelector('form').onsubmit = e => ok(e.submitter.value));
+  if (res === 'ok') {
+    const texto = $('obsTexto').value.trim();
+    if (!texto) return alert('Debe anotar la falta cometida.'), editarObs(id);
+    r.obs = { nivel: Number(dlg.querySelector('[name=nivel]:checked').value), texto };
+  } else if (res === 'quitar') r.obs = null;
+  else return;
+  await DB.put('clases', pase.clase);
+  pintarAlumnos();
+}
+
+$('fecha').onchange = cargarClase;
+$('unidad').onchange = async () => {
+  if (pase.cerrada || !pase.clase.id) return cargarClase();
+  pase.clase.unidad = Number($('unidad').value);
+  await DB.put('clases', pase.clase);
+  await DB.put('config', { ...(await DB.get('config', 'config') || { id: 'config' }), unidadActual: pase.clase.unidad });
+};
+$('btnVolver').onclick = mostrarSecciones;
+
+// ---------- Notas de unidad (RF-08/09/13) ----------
+let notas = null; // { seccionId, unidad, alumnos, clases, reg }
+
+async function abrirNotas(seccionId) {
+  const cfg = await DB.get('config', 'config');
+  $('unidadNotas').value = cfg?.unidadActual || 1;
+  $('tituloNotas').textContent = `Notas ${seccionId}`;
+  notas = { seccionId };
+  ver('vNotas');
+  cargarNotas();
+}
+
+// Clases del alumno en la unidad, en el formato que espera calculo.js
+const clasesDe = (clases, id) => clases.filter(c => id in c.marcas)
+  .map(c => ({ marca: c.marcas[id].m, amonestacion: c.marcas[id].obs?.nivel === 2 }));
+
+async function cargarNotas() {
+  const unidad = Number($('unidadNotas').value), id = `${notas.seccionId}|${unidad}`;
+  Object.assign(notas, {
+    unidad,
+    alumnos: (await DB.todos('alumnos')).filter(a => a.seccionId === notas.seccionId).sort((a, b) => a.id.localeCompare(b.id)),
+    clases: (await DB.todos('clases')).filter(c => c.seccionId === notas.seccionId && c.unidad === unidad),
+    reg: await DB.get('unidades', id) || { id, seccionId: notas.seccionId, unidad, examenes: {}, cerrada: false },
+  });
+  pintarNotas();
+}
+
+function pintarNotas() {
+  const { alumnos, clases, reg } = notas;
+  $('avisoCerrada').classList.toggle('oculto', !reg.cerrada);
+  $('btnCerrar').textContent = reg.cerrada ? 'Reabrir unidad' : 'Cerrar unidad';
+  $('filasNotas').innerHTML = alumnos.map(a => {
+    const cl = clasesDe(clases, a.id), calif = cl.filter(c => c.marca in PORCENTAJE).length;
+    const ex = reg.examenes[a.id];
+    return `<tr data-id="${a.id}">
+      <td class="${a.estado === 'retirado' ? 'retirado' : ''}"><b>${a.nombre}</b><br><span class="muted">${a.id}${a.estado !== 'activo' ? ' · ' + a.estado : ''}</span></td>
+      <td class="num">${calif}</td>
+      <td class="num">${mostrar(actitudinal(cl))}</td>
+      <td class="num"><input inputmode="decimal" value="${ex ?? ''}" ${reg.cerrada ? 'disabled' : ''}></td>
+      <td class="num"><b>${mostrar(notaUnidad(cl, ex))}</b></td></tr>`;
+  }).join('');
+}
+
+$('filasNotas').onchange = async e => {
+  if (e.target.tagName !== 'INPUT') return;
+  const id = e.target.closest('tr').dataset.id, v = e.target.value.trim();
+  if (v === '') delete notas.reg.examenes[id];
+  else {
+    const n = Number(v.replace(',', '.'));
+    if (isNaN(n) || n < 0 || n > 40) { alert('El examen va de 0 a 40.'); return pintarNotas(); }
+    notas.reg.examenes[id] = n;
+  }
+  await DB.put('unidades', notas.reg);
+  pintarNotas();
+};
+$('filasNotas').onclick = e => { const td = e.target.closest('td'); if (td && td.cellIndex === 0) editarEstado(td.closest('tr').dataset.id); };
+
+async function editarEstado(id) {
+  const a = notas.alumnos.find(x => x.id === id), dlg = $('dlgEstado');
+  $('dlgEstadoTitulo').textContent = a.nombre;
+  $('estadoSel').value = a.estado; $('fechaRetiro').value = a.fechaRetiro || '';
+  dlg.showModal();
+  const res = await new Promise(ok => dlg.querySelector('form').onsubmit = e => ok(e.submitter.value));
+  if (res !== 'ok') return;
+  a.estado = $('estadoSel').value;
+  a.fechaRetiro = a.estado === 'retirado' ? ($('fechaRetiro').value || hoy()) : null;
+  await DB.put('alumnos', a);
+  pintarNotas();
+}
+
+$('btnCerrar').onclick = async () => {
+  const r = notas.reg;
+  if (!r.cerrada && !confirm(`¿Cerrar la unidad ${r.unidad} de ${r.seccionId}? No se podrán cambiar marcas ni exámenes.`)) return;
+  r.cerrada = !r.cerrada;
+  await DB.put('unidades', r);
+  pintarNotas();
+};
+// ---------- Exportar (RF-14/15) ----------
+async function encabezado(unidad) {
+  let cfg = await DB.get('config', 'config') || { id: 'config' };
+  if (!cfg.docente) {
+    const d = prompt('Nombre de la docente (aparece en el encabezado del cuadro):');
+    if (!d) return null;
+    await DB.put('config', cfg = { ...cfg, docente: d.trim() });
+  }
+  const sec = await DB.get('secciones', notas.seccionId);
+  return { grado: sec.grado, seccion: sec.seccion, docente: cfg.docente, unidad };
+}
+
+function descargarXlsx(filas, nombreHoja, archivo) {
+  const ws = XLSX.utils.aoa_to_sheet(filas);
+  ws['!cols'] = [{ wch: 4 }, { wch: 8 }, { wch: 36 }, ...Array(6).fill({ wch: 12 })];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
+  XLSX.writeFile(wb, archivo);
+}
+
+$('btnExportarCuadro').onclick = async () => {
+  const enc = await encabezado(notas.unidad); if (!enc) return;
+  const { alumnos, clases, reg } = notas;
+  const filas = alumnos.map(a => {
+    const cl = clasesDe(clases, a.id);
+    return { id: a.id, nombre: a.nombre, estado: a.estado, clases: cl.filter(c => c.marca in PORCENTAJE).length,
+      actitudinal: actitudinal(cl), examen: reg.examenes[a.id], total: notaUnidad(cl, reg.examenes[a.id]) };
+  });
+  descargarXlsx(filasCuadro(enc, filas), `Unidad ${enc.unidad}`, `Cuadro_${notas.seccionId}_U${enc.unidad}.xlsx`);
+};
+
+$('btnExportarConsolidado').onclick = async () => {
+  const enc = await encabezado(); if (!enc) return;
+  const todasClases = (await DB.todos('clases')).filter(c => c.seccionId === notas.seccionId);
+  const regs = await Promise.all([1, 2, 3, 4].map(u => DB.get('unidades', `${notas.seccionId}|${u}`)));
+  const filas = notas.alumnos.map(a => ({ id: a.id, nombre: a.nombre, estado: a.estado,
+    unidades: [1, 2, 3, 4].map(u => {
+      const cl = clasesDe(todasClases.filter(c => c.unidad === u), a.id);
+      // ponytail: unidad sin clases = sin nota (no cuenta en el promedio); criterio de retirados pendiente.
+      return cl.length ? notaUnidad(cl, regs[u - 1]?.examenes[a.id]) : null;
+    }) }));
+  descargarXlsx(filasConsolidado(enc, filas), 'Consolidado', `Consolidado_${notas.seccionId}.xlsx`);
+};
+
+$('unidadNotas').onchange = cargarNotas;
+$('btnVolverNotas').onclick = mostrarSecciones;
+pedirPin().then(mostrarSecciones);
+</script>
+</body>
+</html>
