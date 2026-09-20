@@ -46,7 +46,9 @@ Cada alumno recibe una clave como `5A-01`, `5A-02`… en el orden del listado.
 
 Todo se guarda al instante. No hay botón de guardar.
 
-**Corregir un día anterior:** en Lista, cambie la fecha a ese día y corrija las marcas.
+**Corregir un día anterior:** en Lista, elija el día en **Clases registradas** (o cambie la fecha) y corrija las marcas.
+
+**Clase creada por error** (por ejemplo, abrió una fecha equivocada): abra ese día y toque **Eliminar esta clase**. Se borran solo las marcas de ese día.
 
 ## 4. Notas de la unidad
 
@@ -74,6 +76,7 @@ La primera vez le pedirá su nombre para el encabezado. Los archivos quedan en l
 
 Los datos viven solo en su teléfono. Si se daña o se pierde, se pierde el ciclo entero.
 
+- La app le avisa en Secciones cuando lleva más de 7 días sin respaldo.
 - **⬇ Guardar respaldo** (pantalla de Secciones) descarga un archivo `respaldo_edfisica_FECHA.json`. **Hágalo cada semana** y guárdelo en Drive, correo o WhatsApp a usted misma.
 - **⬆ Restaurar** carga ese archivo en un teléfono nuevo o después de una pérdida. Reemplaza todo lo que haya.
 
