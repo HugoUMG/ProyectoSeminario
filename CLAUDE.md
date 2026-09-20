@@ -95,6 +95,7 @@ Pasos 1–7 hechos: cálculo, modelo+importar, pase de lista, examen/cierre/esta
 Archivos: `index.html` (UI), `db.js`, `calculo.js`, `importar.js`, `exportar.js`, `sw.js`, `manifest.json`, `test_*.js` (`node test_calculo.js` etc.).
 Probar: `python -m http.server 8765` (o `.claude/launch.json`). El service worker exige http(s)/localhost, no `file://`.
 Publicar: GitHub Pages u otro hosting estático gratuito. Al cambiar archivos, subir `VERSION` en `sw.js`.
+Documentación técnica: `Documentacion_Tecnica.docx/.pdf`, generada con `docs/pasadas.sh` (Node + LibreOffice + PyMuPDF); diagramas en `docs/diagramas.py`.
 Hecho también: eliminar clase, desplegable de clases registradas, recordatorio de respaldo (>7 días), rediseño CSS.
 Pendiente: formato Excel oficial. RF-17 hecho (`pocasClases`: < mitad de la mediana de la sección, mediana ≥ 4).
 

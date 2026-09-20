@@ -1,0 +1,1 @@
+{ "name": "docs-edfisica", "private": true, "dependencies": { "docx": "^9" } }
