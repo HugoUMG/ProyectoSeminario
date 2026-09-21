@@ -96,6 +96,7 @@ Archivos: `index.html` (UI), `db.js`, `calculo.js`, `importar.js`, `exportar.js`
 Probar: `python -m http.server 8765` (o `.claude/launch.json`). El service worker exige http(s)/localhost, no `file://`.
 Publicar: GitHub Pages u otro hosting estático gratuito. Al cambiar archivos, subir `VERSION` en `sw.js`.
 Documentación técnica: `Documentacion_Tecnica.docx/.pdf`, generada con `docs/pasadas.sh` (Node + LibreOffice + PyMuPDF); diagramas en `docs/diagramas.py`.
+Compartir: botón «Probar con datos de ejemplo» en estado vacío; `hacer_tarjeta.py` genera `compartir/` (QR, tarjeta PNG/PDF).
 Hecho también: eliminar clase, desplegable de clases registradas, recordatorio de respaldo (>7 días), rediseño CSS.
 Pendiente: formato Excel oficial. RF-17 hecho (`pocasClases`: < mitad de la mediana de la sección, mediana ≥ 4).
 

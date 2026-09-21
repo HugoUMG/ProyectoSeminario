@@ -110,7 +110,11 @@
   <h2>Secciones</h2>
   <div id="avisoRespaldo" class="aviso cerrada oculto"></div>
   <ul id="listaSecciones"></ul>
-  <p id="sinSecciones" class="muted">No hay alumnos cargados. Toque <b>+ Importar</b> para cargar un listado desde Excel.</p>
+  <div id="sinSecciones">
+    <p class="muted">No hay alumnos cargados. Toque <b>+ Importar</b> para cargar un listado desde Excel.</p>
+    <button id="btnEjemplo" style="width:100%">Probar con datos de ejemplo</button>
+    <p class="muted" style="font-size:14px">Crea dos secciones ficticias con clases y notas para conocer la app. Se borran al importar o restaurar.</p>
+  </div>
   <h2 style="margin-top:32px">Respaldo</h2>
   <p class="muted">Guarde una copia de todo (alumnos, marcas, exámenes) por si el teléfono se daña o se pierde.</p>
   <div class="fila">
@@ -326,6 +330,28 @@ $('btnRespaldar').onclick = async () => {
 };
 $('btnRestaurar').onclick = () => $('archivoRespaldo').click();
 $('btnCambiarPin').onclick = cambiarPin;
+
+// ---------- Datos de ejemplo (para probar la app sin un listado real) ----------
+$('btnEjemplo').onclick = async () => {
+  const nombres = ['Ana López Pérez', 'Juan Carlos Tzul', 'María Ixchel Chuc', 'Pedro Tax Ajpop', 'Lucía Chan Vásquez', 'Diego Tzoc Ixcoy', 'Sofía Ajanel Puac', 'Mateo Yax Tiu', 'Valeria Tum Sic', 'Andrés Poz Xum'];
+  const M = ['✓', '✓', '✓', '✓', '✓', 'X', '✓', '*', 'P', '✓', 'E', '✓'];
+  const secciones = [{ id: '5A', grado: '5', seccion: 'A', entregaNotas: true }, { id: '6B', grado: '6', seccion: 'B', entregaNotas: true }];
+  const alumnos = [], clases = [], unidades = [];
+  for (const sec of secciones) {
+    const als = nombres.map((n, i) => ({ id: `${sec.id}-${String(i + 1).padStart(2, '0')}`, nombre: n, seccionId: sec.id, estado: 'activo', fechaRetiro: null }));
+    alumnos.push(...als);
+    const d = new Date(); d.setDate(d.getDate() - 30);
+    for (let k = 0; k < 12; k++) {
+      d.setDate(d.getDate() + (k % 2 ? 3 : 2)); const fecha = d.toLocaleDateString('sv');
+      clases.push({ id: `${sec.id}|${fecha}`, seccionId: sec.id, fecha, unidad: 1,
+        marcas: Object.fromEntries(als.map((a, i) => [a.id, { m: M[(i * 5 + k) % M.length], obs: (i + k) % 9 === 4 ? { nivel: 2, texto: 'Empujó a un compañero' } : null }])) });
+    }
+    unidades.push({ id: `${sec.id}|1`, seccionId: sec.id, unidad: 1, examenes: Object.fromEntries(als.slice(0, 7).map((a, i) => [a.id, 28 + i * 2])), cerrada: false });
+  }
+  const cfg = await DB.get('config', 'config') || { id: 'config' };
+  await DB.restaurar({ secciones, alumnos, clases, unidades, config: [{ ...cfg, docente: cfg.docente || 'Docente de ejemplo', unidadActual: 1 }] });
+  mostrarSecciones();
+};
 $('archivoRespaldo').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
   let datos;

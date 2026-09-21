@@ -4,6 +4,8 @@ Aplicación para el teléfono que reemplaza el cuaderno de marcas. Calcula sola 
 
 **Dirección:** https://hugoumg.github.io/ProyectoSeminario/
 
+Funciona en teléfono o computadora con Chrome, sin instalar nada ni crear cuentas. Para conocerla sin un listado real, toque **Probar con datos de ejemplo** en la primera pantalla. Para compartirla, use la tarjeta con código QR en `compartir/` (PNG para WhatsApp, PDF para imprimir).
+
 ---
 
 ## 1. Instalar en el teléfono (una sola vez)
